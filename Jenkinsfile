@@ -1,27 +1,29 @@
 pipeline {
     agent any
-
-    tools {
+	   tools {
         maven 'Maven 3.9.9'  // Match your Maven version; configure this in Jenkins
         jdk 'jdk-21'        // Match your JDK; configure in Jenkins Global Tool Config
     }
 
-       environment {
+    environment {
         MAJOR_VERSION = "1"
         MINOR_VERSION = "0"
+        BUILD_DATE = new Date().format('ddMMyy')  // evaluated in script block
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout & Tag') {
             steps {
-                //deleteDir()
-                //checkout scm
-                // git credentialsId: 'github_token', url: 'https://github.com/yugesh-kk/sample-jenkins-app.git'
-
                 script {
                     deleteDir()
                     checkout scm
-
+                        }
+			    }
+               }	
+           stage('tag')
+		    {
+              steps {
+                script {		   
                     // Dynamically build version with date and Jenkins build number
                     def buildDate = new Date().format('ddMMyy')
                     def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
@@ -46,18 +48,20 @@ pipeline {
                         echo "Skipping tag creation. Current branch is '${branch}'."
                     }
                 }
-        }
-     }
-
-        stage('Build') {
-            steps {
-                bat 'mvn clean package'
             }
         }
 
-        stage('Test') {
+        stage('Build') {
             steps {
-                bat 'mvn test'
+                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
+                    bat 'mvn clean package'
+                }
+            }
+        }
+
+        stage('Post Build Info') {
+            steps {
+                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
             }
         }
     }
