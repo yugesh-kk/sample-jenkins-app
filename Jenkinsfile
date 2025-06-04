@@ -33,7 +33,7 @@ pipeline {
                     env.CUSTOM_BUILD_VERSION = customVersion
 
                     // Tag only if on 'master' branch
-                    #def branch = bat(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+                //def branch = bat(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                     if (${env.BRANCH}== 'master') {
                         def tagName = "v${customVersion}"
                         echo "Creating Git tag: ${tagName}"
