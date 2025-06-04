@@ -9,6 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                deleteDir()
                 git credentialsId: 'github_token', url: 'https://github.com/yugesh-kk/sample-jenkins-app.git'
             }
         }
