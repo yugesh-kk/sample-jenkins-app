@@ -34,7 +34,7 @@ pipeline {
 
                     // Tag only if on 'master' branch
                 //def branch = bat(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
-                    if (${env.BRANCH}== 'master') {
+                    if (${env.BRANCH_NAME} == 'master') {
                         def tagName = "v${customVersion}"
                         echo "Creating Git tag: ${tagName}"
 
@@ -45,7 +45,7 @@ pipeline {
                             git push origin ${tagName}
                         """
                     } else {
-                        echo "Skipping tag creation. Current branch is ${env.BRANCH}."
+                        echo "Skipping tag creation. Current branch is ${env.BRANCH_NAME}."
                     }
                 }
             }
