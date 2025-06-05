@@ -7,6 +7,13 @@
   <version>1.0-SNAPSHOT</version>
   <name>sample-jenkins-app</name>
   <url>http://maven.apache.org</url>
+  <distributionManagement>
+    <repository>
+        <id>nexus</id>
+        <url>http://localhost:8081/repository/maven-releases/</url>
+    </repository>
+</distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
