@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Tag') {
+      /*  stage('Tag') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                     script {
@@ -42,7 +42,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
 
         stage('Build & Deploy to Nexus') {
             steps {
