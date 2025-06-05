@@ -22,6 +22,11 @@ pipeline {
             }
         }
 
+    stage('Approval') {
+    steps {
+        input message: 'Proceed to Deploy?'
+       }
+    }
       /*  stage('Tag') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
