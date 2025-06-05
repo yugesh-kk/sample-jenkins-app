@@ -9,7 +9,7 @@ pipeline {
     environment {
         MAJOR_VERSION = "1"
         MINOR_VERSION = "0"
-        SETTINGS_PATH = "C:\ProgramData\Jenkins\.m2\settings.xml"
+        SETTINGS_PATH = "C:\\ProgramData\\Jenkins\\.m2\\settings.xml"
     }
 
     stages {
