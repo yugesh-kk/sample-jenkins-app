@@ -4,7 +4,7 @@
   <groupId>com.yugesh.app</groupId>
   <artifactId>sample-jenkins-app</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.1</version>
   <name>sample-jenkins-app</name>
   <url>http://maven.apache.org</url>
   <distributionManagement>
