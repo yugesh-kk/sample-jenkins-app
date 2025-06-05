@@ -22,7 +22,7 @@ pipeline {
 
         stage('Tag') {
     steps {
-        withCredentials([string(credentialsId: 'github_write_token', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
             script {
                 def buildDate = new Date().format('ddMMyy')
                 def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
