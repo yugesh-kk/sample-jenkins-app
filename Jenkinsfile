@@ -46,13 +46,13 @@ pipeline {
 
         stage('Build & Deploy to Nexus') {
             steps {
-                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
+                
                     withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                         bat """
                             mvn clean deploy -DskipTests=true -Dnexus.username=%NEXUS_USER% -Dnexus.password=%NEXUS_PASS%
                         """
                     }
-                }
+                
             }
         }
 
