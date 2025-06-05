@@ -1,9 +1,8 @@
 pipeline {
     agent any
-
     tools {
-        maven 'Maven 3.9.9'    // Configure this in Jenkins Global Tool Config
-        jdk 'jdk-21'           // Configure this too
+        maven 'Maven 3.9.9' // Match your Maven version
+        jdk 'jdk-21'        // Match your JDK
     }
 
     environment {
@@ -12,7 +11,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout & Tag') {
             steps {
                 script {
                     deleteDir()
@@ -26,9 +25,7 @@ pipeline {
                 script {
                     def buildDate = new Date().format('ddMMyy')
                     def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
-                    echo "🔖 Custom Build Version: ${customVersion}"
                     env.CUSTOM_BUILD_VERSION = customVersion
-
                     def tagName = "v${customVersion}"
                     echo "Creating Git tag: ${tagName}"
 
@@ -44,15 +41,33 @@ pipeline {
 
         stage('Build') {
             steps {
-                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') { // adjust this path if needed
+                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
                     bat 'mvn clean package'
+                }
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    script {
+                        def jarFile = "sysinfo-jenkins-app/sysinfo-jenkins-app/target/sysinfo-jenkins-app-${env.CUSTOM_BUILD_VERSION}.jar"
+                        def nexusRepo = "maven-releases"  // or "raw-repo" if using raw type
+                        def nexusUrl = "http://localhost:8081/repository/${nexusRepo}/"
+
+                        echo "Uploading ${jarFile} to Nexus at ${nexusUrl}"
+
+                        bat """
+                            curl -v -u %NEXUS_USER%:%NEXUS_PASS% --upload-file ${jarFile} ${nexusUrl}sysinfo-jenkins-app-${env.CUSTOM_BUILD_VERSION}.jar
+                        """
+                    }
                 }
             }
         }
 
         stage('Post Build Info') {
             steps {
-                echo "✅ Build completed successfully with version: ${env.CUSTOM_BUILD_VERSION}"
+                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
             }
         }
     }
