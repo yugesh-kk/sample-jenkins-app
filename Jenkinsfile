@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3.9.9' // Match your Maven version
-        jdk 'jdk-21'        // Match your JDK
+        maven 'Maven 3.9.9'
+        jdk 'jdk-21'
     }
 
     environment {
@@ -22,44 +22,44 @@ pipeline {
 
         stage('Tag') {
             steps {
-                script {
-                    def buildDate = new Date().format('ddMMyy')
-                    def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
-                    env.CUSTOM_BUILD_VERSION = customVersion
-                    def tagName = "v${customVersion}"
-                    echo "Creating Git tag: ${tagName}"
-
-                    bat """
-                        git config user.name "jenkins"
-                        git config user.email "jenkins@example.com"
-                        git tag ${tagName}
-                        git push origin ${tagName}
-                    """
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
-                    bat 'mvn clean package'
-                }
-            }
-        }
-
-        stage('Deploy to Nexus') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                     script {
-                        def jarFile = "sysinfo-jenkins-app/sysinfo-jenkins-app/target/sysinfo-jenkins-app-${env.CUSTOM_BUILD_VERSION}.jar"
-                        def nexusRepo = "maven-releases"  // or "raw-repo" if using raw type
-                        def nexusUrl = "http://localhost:8081/repository/${nexusRepo}/"
+                        def buildDate = new Date().format('ddMMyy')
+                        def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
+                        env.CUSTOM_BUILD_VERSION = customVersion
+                        def tagName = "v${customVersion}"
+                        echo "Creating Git tag: ${tagName}"
 
-                        echo "Uploading ${jarFile} to Nexus at ${nexusUrl}"
+                        def gitRepoUrl = "https://${GIT_USER}:${GIT_PASS}@github.com/yugesh-kk/sample-jenkins-app.git"
 
                         bat """
-                            curl -v -u %NEXUS_USER%:%NEXUS_PASS% --upload-file ${jarFile} ${nexusUrl}sysinfo-jenkins-app-${env.CUSTOM_BUILD_VERSION}.jar
+                            git config user.name "jenkins"
+                            git config user.email "jenkins@example.com"
+                            git remote set-url origin ${gitRepoUrl}
+                            git tag ${tagName}
+                            git push origin ${tagName}
                         """
+                    }
+                }
+            }
+        }
+
+        stage('Build & Deploy to Nexus') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
+                        writeFile file: 'settings.xml', text: """
+                            <settings>
+                              <servers>
+                                <server>
+                                  <id>nexus</id>
+                                  <username>${NEXUS_USER}</username>
+                                  <password>${NEXUS_PASS}</password>
+                                </server>
+                              </servers>
+                            </settings>
+                        """
+                        bat 'mvn clean deploy --settings settings.xml'
                     }
                 }
             }
@@ -67,7 +67,7 @@ pipeline {
 
         stage('Post Build Info') {
             steps {
-                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
+                echo "✅ Build completed and deployed with version: ${env.CUSTOM_BUILD_VERSION}"
             }
         }
     }
