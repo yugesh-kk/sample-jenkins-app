@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     tools {
         maven 'Maven 3.9.9'
         jdk 'jdk-21'
@@ -21,46 +22,35 @@ pipeline {
         }
 
         stage('Tag') {
-    steps {
-        withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
-            script {
-                def buildDate = new Date().format('ddMMyy')
-                def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
-                env.CUSTOM_BUILD_VERSION = customVersion
-                def tagName = "v${customVersion}"
-                echo "Creating Git tag: ${tagName}"
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                    script {
+                        def buildDate = new Date().format('ddMMyy')
+                        def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
+                        env.CUSTOM_BUILD_VERSION = customVersion
+                        def tagName = "v${customVersion}"
 
-                def gitRepoUrl = "https://${GITHUB_TOKEN}@github.com/yugesh-kk/sample-jenkins-app.git"
+                        echo "Creating Git tag: ${tagName}"
 
-                bat """
-                    git config user.name "jenkins"
-                    git config user.email "jenkins@example.com"
-                    git remote set-url origin ${gitRepoUrl}
-                    git tag ${tagName}
-                    git push origin ${tagName}
-                """
+                        bat """
+                            git config user.name "jenkins"
+                            git config user.email "jenkins@example.com"
+                            git remote set-url origin https://${GIT_USER}:${GIT_PASS}@github.com/yugesh-kk/sample-jenkins-app.git
+                            git tag ${tagName}
+                            git push origin ${tagName}
+                        """
+                    }
+                }
             }
         }
-    }
-}
-
 
         stage('Build & Deploy to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
-                        writeFile file: 'settings.xml', text: """
-                            <settings>
-                              <servers>
-                                <server>
-                                  <id>nexus</id>
-                                  <username>${NEXUS_USER}</username>
-                                  <password>${NEXUS_PASS}</password>
-                                </server>
-                              </servers>
-                            </settings>
+                dir('sysinfo-jenkins-app/sysinfo-jenkins-app') {
+                    withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                        bat """
+                            mvn clean deploy -DskipTests=true -Dnexus.username=%NEXUS_USER% -Dnexus.password=%NEXUS_PASS%
                         """
-                        bat 'mvn clean deploy --settings settings.xml'
                     }
                 }
             }
@@ -68,7 +58,7 @@ pipeline {
 
         stage('Post Build Info') {
             steps {
-                echo "✅ Build completed and deployed with version: ${env.CUSTOM_BUILD_VERSION}"
+                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
             }
         }
     }
