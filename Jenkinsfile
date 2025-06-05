@@ -9,6 +9,7 @@ pipeline {
     environment {
         MAJOR_VERSION = "1"
         MINOR_VERSION = "0"
+        SETTINGS_PATH = "C:\ProgramData\Jenkins\.m2\settings.xml"
     }
 
     stages {
@@ -44,15 +45,9 @@ pipeline {
             }
         }*/
 
-        stage('Build & Deploy to Nexus') {
+    stage('Build & Deploy') {
             steps {
-                
-                    withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                        bat """
-                            mvn clean deploy -DskipTests=true -Dnexus.username=%NEXUS_USER% -Dnexus.password=%NEXUS_PASS%
-                        """
-                    }
-                
+                bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
             }
         }
 
