@@ -50,24 +50,24 @@ pipeline {
             }
         }*/
 
-    stage('Ansible AWX Deployment') {
+stage('Ansible AWX Deployment') {
     steps {
         withCredentials([string(credentialsId: 'anisble_token', variable: 'AWX_TOKEN')]) {
             script {
-                def awxHost = "http://16.16.94.149/"  // Replace with your AWX host
-                def jobTemplateId = 9                        // Replace with your Job Template ID
+                def awxHost = "http://16.16.94.149"  // Replace with your AWX host
+                def jobTemplateId = 9               // Replace with your Job Template ID
 
-                
                 echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
 
-                curl -X POST \
-				  -H "Accept: application/json" \
-				  -H "Content-Type: application/json" \
-				  -H "Authorization: Bearer ${AWX_TOKEN}" \
-				  "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+                def curlCommand = """
+                curl -X POST ^
+                  -H "Accept: application/json" ^
+                  -H "Content-Type: application/json" ^
+                  -H "Authorization: Bearer ${AWX_TOKEN}" ^
+                  "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+                """
 
-
-                echo "AWX Response: ${response.content}"
+                bat curlCommand
             }
         }
     }
