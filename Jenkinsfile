@@ -52,7 +52,7 @@ pipeline {
 
 stage('Ansible AWX Deployment') {
     steps {
-        withCredentials([string(credentialsId: 'anisble_token', variable: 'AWX_TOKEN')]) {
+        withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
             script {
                 def awxHost = "http://16.16.94.149"  // Replace with your AWX host
                 def jobTemplateId = 9               // Replace with your Job Template ID
