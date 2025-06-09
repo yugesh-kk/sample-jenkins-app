@@ -50,7 +50,54 @@ pipeline {
             }
         }*/
 
-stage('Ansible AWX Deployment') {
+
+    /*stage('Build & Deploy') {
+            steps {
+                bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
+            }
+        }*/
+
+        //stage to call Ansible Tower job template - yml Download from Nexus and deploy into the ec2 server and stop-start service.
+
+        /*stage('Post Build Info') {
+            steps {
+                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
+            }
+        }*/
+
+        stage('Build & Deploy') {
+    steps {
+        bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
+    }
+    post {
+        success {
+            buildAnsibleStage()
+        }
+    }
+}
+
+        def buildAnsibleStage = {
+    withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
+        def awxHost = "http://16.16.94.149"
+        def jobTemplateId = 9
+
+        echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
+
+        def curlCommand = """
+        curl -X POST ^
+          -H "Accept: application/json" ^
+          -H "Content-Type: application/json" ^
+          -H "Authorization: Bearer ${AWX_TOKEN}" ^
+          "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+        """
+
+        bat curlCommand
+    }
+}
+
+
+
+       /* stage('Ansible AWX Deployment') {
     steps {
         withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
             script {
@@ -71,21 +118,8 @@ stage('Ansible AWX Deployment') {
             }
         }
     }
-}
+} */
 
-
-    stage('Build & Deploy') {
-            steps {
-                bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
-            }
-        }
-
-        //stage to call Ansible Tower job template - yml Download from Nexus and deploy into the ec2 server and stop-start service.
-
-        stage('Post Build Info') {
-            steps {
-                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
-            }
-        }
+        
     }
 }
