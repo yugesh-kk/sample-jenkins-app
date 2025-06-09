@@ -1,0 +1,8 @@
+---
+- name: Say Hello to the Target Host
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Print a welcome message
+      debug:
+        msg: "Hello from AWX! 🎉 This playbook ran successfully."
