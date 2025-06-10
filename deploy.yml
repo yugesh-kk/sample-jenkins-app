@@ -1,0 +1,25 @@
+---
+- name: Deploy JAR from Nexus to EC2
+  hosts: my_ec2
+  become: true
+  vars:
+    nexus_url: "http://<nexus-public-ip>:8081/repository/maven-releases/com/example/sample-jenkins-app/1.0.1/sample-jenkins-app-1.0.1.jar"
+    dest_path: "/home/ubuntu/sample-jenkins-app.jar"
+    app_user: "ubuntu"
+
+  tasks:
+    - name: Download JAR from Nexus
+      get_url:
+        url: "{{ nexus_url }}"
+        dest: "{{ dest_path }}"
+        mode: '0755'
+
+    - name: Stop existing application (if any)
+      shell: |
+        pkill -f 'sample-jenkins-app.jar' || echo "No running process"
+
+    - name: Start the application
+      shell: |
+        nohup java -jar {{ dest_path }} > app.log 2>&1 &
+      args:
+        chdir: "/home/{{ app_user }}"
