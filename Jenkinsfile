@@ -76,24 +76,7 @@ pipeline {
     }
 }
 
-        def buildAnsibleStage = {
-    withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
-        def awxHost = "http://16.16.94.149"
-        def jobTemplateId = 10
 
-        echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
-
-        def curlCommand = """
-        curl -X POST ^
-          -H "Accept: application/json" ^
-          -H "Content-Type: application/json" ^
-          -H "Authorization: Bearer ${AWX_TOKEN}" ^
-          "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
-        """
-
-        bat curlCommand
-    }
-}
 
 
 
@@ -121,5 +104,24 @@ pipeline {
 } */
 
         
+    }
+}
+
+        def buildAnsibleStage = {
+    withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
+        def awxHost = "http://16.16.94.149"
+        def jobTemplateId = 10
+
+        echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
+
+        def curlCommand = """
+        curl -X POST ^
+          -H "Accept: application/json" ^
+          -H "Content-Type: application/json" ^
+          -H "Authorization: Bearer ${AWX_TOKEN}" ^
+          "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+        """
+
+        bat curlCommand
     }
 }
