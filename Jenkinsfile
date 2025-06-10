@@ -18,7 +18,7 @@ pipeline {
                 script {
                     deleteDir()
                     checkout scm
-
+                    echo "trigger configure"
                     echo "${env.BRANCH_NAME}"
                     
                 }
