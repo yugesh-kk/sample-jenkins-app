@@ -10,6 +10,7 @@ pipeline {
         MAJOR_VERSION = "1"
         MINOR_VERSION = "0"
         SETTINGS_PATH = "C:\\ProgramData\\Jenkins\\.m2\\settings.xml"
+        BRANCH_NAME = "master"
     }
 
     stages {
@@ -20,29 +21,48 @@ pipeline {
                     checkout scm
                     echo "trigger configure"
                     echo "${env.BRANCH_NAME}"
-                    
                 }
             }
         }
         stage('Build & Deploy') {
             steps {
                 bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
-                
             }
-
-        //stage('Deploy the Jar in Server'){
-
             post {
                 success {
                     echo "✅ Build completed"
-                    //buildAnsibleStage()
+                    // buildAnsibleStage() // Uncomment if you want to call this function on success
                 }
             }
         }
+        // Uncomment the following stage if you want to deploy the Jar in Server within the pipeline
+        
+        stage('Deploy the Jar in Server') {
+            when{
+            (env.BRANCH_NAME == "master")
+            }
+            steps {
+                // Add your deployment steps here
+                echo "Deploying Jar to server..."
+                // For example:
+                // sh "scp target/your-app.jar user@your-server:/path/to/deploy"
+            }
+            post {
+                success {
+                    echo "🚀 Jar deployed successfully!"
+                }
+                failure {
+                    echo "❌ Jar deployment failed!"
+                }
+            }
+        }
+        
     }
 }
 
 // Define the buildAnsibleStage function outside the pipeline block
+// This function is currently not called in the pipeline above,
+// but can be uncommented in the 'Build & Deploy' stage's post section.
 def buildAnsibleStage() {
     withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
         script {
@@ -51,15 +71,15 @@ def buildAnsibleStage() {
 
             echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
 
-            def curlCommand = """
+            // Using powershell for curl on Windows agents for better compatibility
+            // For Linux/Unix agents, you'd typically use 'sh' instead of 'bat'
+            bat """
             curl -X POST ^
               -H "Accept: application/json" ^
               -H "Content-Type: application/json" ^
               -H "Authorization: Bearer ${AWX_TOKEN}" ^
               "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
             """
-
-            bat curlCommand
         }
     }
 }
