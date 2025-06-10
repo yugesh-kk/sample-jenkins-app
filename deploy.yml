@@ -1,5 +1,5 @@
 ---
-- name: Deploy JAR from Nexus to EC2
+- name: Deploy JAR from Nexus to host
   hosts: all
   become: true
   vars:
