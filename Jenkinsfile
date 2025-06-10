@@ -47,8 +47,9 @@ pipeline {
                 timeout(time: 72, unit: 'HOURS') {
                     input(id: 'uat', message: 'Deploy to UAT?', ok: 'Deploy')
                 }
+                buildAnsibleStage()
             }
-            buildAnsibleStage()
+            
             post {
                 success {
                     echo "🚀 Jar deployed successfully!"
