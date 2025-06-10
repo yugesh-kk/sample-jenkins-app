@@ -44,9 +44,11 @@ pipeline {
             steps {
                 // Add your deployment steps here
                 echo "Deploying Jar to server..."
-                // For example:
-                // sh "scp target/your-app.jar user@your-server:/path/to/deploy"
+                timeout(time: 72, unit: 'HOURS') {
+                    input(id: 'uat', message: 'Deploy to UAT?', ok: 'Deploy')
+                }
             }
+            buildAnsibleStage()
             post {
                 success {
                     echo "🚀 Jar deployed successfully!"
