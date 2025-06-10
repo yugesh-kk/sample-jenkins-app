@@ -52,11 +52,16 @@ pipeline {
             
             post {
                 success {
-                    echo "🚀 Jar deployed successfully!"
+                    echo "✅ Jar deployed successfully! 🚀"
                 }
                 failure {
-                    echo "❌ Jar deployment failed!"
+                    echo "❌ Jar deployment failed! 💥"
                 }
+                aborted {
+                    echo "⚠️ Jar deployment aborted! ⛔"
+                }
+            }
+
             }
         }
         
