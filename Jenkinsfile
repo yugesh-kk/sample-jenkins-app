@@ -18,6 +18,7 @@ pipeline {
                 script {
                     deleteDir()
                     checkout scm
+                    checkpoint "build source"
                 }
             }
         }
