@@ -22,106 +22,37 @@ pipeline {
             }
         }
 
-    /*stage('Approval') {
-    steps {
-        input message: 'Proceed to Deploy?'
-       }
-    }*/
-      /*  stage('Tag') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    script {
-                        def buildDate = new Date().format('ddMMyy')
-                        def customVersion = "${env.MAJOR_VERSION}.${env.MINOR_VERSION}.${env.BUILD_NUMBER}-${buildDate}"
-                        env.CUSTOM_BUILD_VERSION = customVersion
-                        def tagName = "v${customVersion}"
-
-                        echo "Creating Git tag: ${tagName}"
-
-                        bat """
-                            git config user.name "jenkins"
-                            git config user.email "jenkins@example.com"
-                            git remote set-url origin https://${GIT_USER}:${GIT_PASS}@github.com/yugesh-kk/sample-jenkins-app.git
-                            git tag ${tagName}
-                            git push origin ${tagName}
-                        """
-                    }
-                }
-            }
-        }*/
-
-
-    /*stage('Build & Deploy') {
+        stage('Build & Deploy') {
             steps {
                 bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
             }
-        }*/
-
-        //stage to call Ansible Tower job template - yml Download from Nexus and deploy into the ec2 server and stop-start service.
-
-        /*stage('Post Build Info') {
-            steps {
-                echo "✅ Build completed with custom version: ${env.CUSTOM_BUILD_VERSION}"
+            post {
+                success {
+                    buildAnsibleStage()
+                }
             }
-        }*/
-
-        stage('Build & Deploy') {
-    steps {
-        bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
-    }
-    post {
-        success {
-            buildAnsibleStage()
         }
     }
 }
 
-
-
-
-
-       /* stage('Ansible AWX Deployment') {
-    steps {
-        withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
-            script {
-                def awxHost = "http://16.16.94.149"  // Replace with your AWX host
-                def jobTemplateId = 9               // Replace with your Job Template ID
-
-                echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
-
-                def curlCommand = """
-                curl -X POST ^
-                  -H "Accept: application/json" ^
-                  -H "Content-Type: application/json" ^
-                  -H "Authorization: Bearer ${AWX_TOKEN}" ^
-                  "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
-                """
-
-                bat curlCommand
-            }
-        }
-    }
-} */
-
-        
-    }
-}
-
-        def buildAnsibleStage = {
+// Define the buildAnsibleStage function outside the pipeline block
+def buildAnsibleStage() {
     withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
-        def awxHost = "http://16.16.94.149"
-        def jobTemplateId = 10
+        script {
+            def awxHost = "http://16.16.94.149"
+            def jobTemplateId = 10
 
-        echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
+            echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
 
-        def curlCommand = """
-        curl -X POST ^
-          -H "Accept: application/json" ^
-          -H "Content-Type: application/json" ^
-          -H "Authorization: Bearer ${AWX_TOKEN}" ^
-          "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
-        """
+            def curlCommand = """
+            curl -X POST ^
+              -H "Accept: application/json" ^
+              -H "Content-Type: application/json" ^
+              -H "Authorization: Bearer ${AWX_TOKEN}" ^
+              "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+            """
 
-        bat curlCommand
+            bat curlCommand
+        }
     }
 }
