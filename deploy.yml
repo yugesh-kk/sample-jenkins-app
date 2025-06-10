@@ -3,7 +3,8 @@
   hosts: all
   become: true
   vars:
-    nexus_url: "http://12f1-2409-40c2-1223-bcc5-2474-41f-1d55-25a1.ngrok-free.app/repository/maven-test-releases/com/yugesh/app/sample-jenkins-app/1.0.1/sample-jenkins-app-1.0.1.jar"
+    #nexus_url: "http://12f1-2409-40c2-1223-bcc5-2474-41f-1d55-25a1.ngrok-free.app/repository/maven-test-releases/com/yugesh/app/sample-jenkins-app/1.0.1/sample-jenkins-app-1.0.1.jar"
+    nexus_url: "https://12f1-2409-40c2-1223-bcc5-2474-41f-1d55-25a1.ngrok-free.app/repository/maven-test-releases/com/yugesh/app/sample-jenkins-app/1.0.1/sample-jenkins-app-1.0.1.jar"
     dest_path: "/home/ubuntu/sample-jenkins-app.jar"
     app_user: "ubuntu"
 
