@@ -18,19 +18,24 @@ pipeline {
                 script {
                     deleteDir()
                     checkout scm
+
+                    echo "${env.BRANCH_NAME}"
                     
                 }
             }
         }
-
         stage('Build & Deploy') {
             steps {
                 bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
                 
             }
+
+        //stage('Deploy the Jar in Server'){
+
             post {
                 success {
-                    buildAnsibleStage()
+                    echo "✅ Build completed"
+                    //buildAnsibleStage()
                 }
             }
         }
