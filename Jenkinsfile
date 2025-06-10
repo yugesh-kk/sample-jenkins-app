@@ -38,9 +38,9 @@ pipeline {
         // Uncomment the following stage if you want to deploy the Jar in Server within the pipeline
         
         stage('Deploy the Jar in Server') {
-            when {
-            (env.BRANCH_NAME == "master")
-            }
+            when { expression {
+            "${env.BRANCH_NAME}" == "master"
+            } }
             steps {
                 // Add your deployment steps here
                 echo "Deploying Jar to server..."
