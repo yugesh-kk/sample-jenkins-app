@@ -18,7 +18,7 @@ pipeline {
                 script {
                     deleteDir()
                     checkout scm
-                    checkpoint "build source"
+                    chekpoint "checkout"
                 }
             }
         }
@@ -26,6 +26,7 @@ pipeline {
         stage('Build & Deploy') {
             steps {
                 bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
+                checkpoint "build"
             }
             post {
                 success {
