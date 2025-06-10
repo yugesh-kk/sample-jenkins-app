@@ -37,7 +37,67 @@ pipeline {
         }
         // Uncomment the following stage if you want to deploy the Jar in Server within the pipeline
         
-        stage('Deploy the Jar in Server') {
+       
+            }
+        }
+
+          stage('Deploy the Jar in DEV Server') {
+            when { expression {
+            "${env.BRANCH_NAME}" == "master"
+            } }
+            steps {
+                // Add your deployment steps here
+                echo "Deploying Jar to server..."
+                timeout(time: 72, unit: 'HOURS') {
+                    input(id: 'dev', message: 'Deploy to DEV?', ok: 'Deploy')
+                }
+                buildAnsibleStage()
+            }
+            
+            post {
+                success {
+                    echo "✅ Jar deployed successfully! 🚀"
+                }
+                failure {
+                    echo "❌ Jar deployment failed! 💥"
+                }
+                aborted {
+                    echo "⚠️ Jar deployment aborted! ⛔"
+                }
+            
+
+            }
+        }
+
+
+           stage('Deploy the Jar in QA Server') {
+            when { expression {
+            "${env.BRANCH_NAME}" == "master"
+            } }
+            steps {
+                // Add your deployment steps here
+                echo "Deploying Jar to server..."
+                timeout(time: 72, unit: 'HOURS') {
+                    input(id: 'qa', message: 'Deploy to QA?', ok: 'Deploy')
+                }
+                buildAnsibleStage()
+            }
+            
+            post {
+                success {
+                    echo "✅ Jar deployed successfully! 🚀"
+                }
+                failure {
+                    echo "❌ Jar deployment failed! 💥"
+                }
+                aborted {
+                    echo "⚠️ Jar deployment aborted! ⛔"
+                }
+            
+
+            }
+        }
+           stage('Deploy the Jar in UAT Server') {
             when { expression {
             "${env.BRANCH_NAME}" == "master"
             } }
@@ -64,6 +124,27 @@ pipeline {
 
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
     }
 }
