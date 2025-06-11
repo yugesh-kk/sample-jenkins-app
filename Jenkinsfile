@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers{
+        pollSCM('H/5 * * * *') // Polls the Git repo every 5 mins
+    }
+
     tools {
         maven 'Maven 3.9.9'
         jdk 'jdk-21'
