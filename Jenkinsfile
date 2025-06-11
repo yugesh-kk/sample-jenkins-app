@@ -1,167 +1,160 @@
+// Jenkinsfile for building, deploying, and promoting a Java application
 pipeline {
     agent any
 
+    // Define tools used in the pipeline
     tools {
-        maven 'Maven 3.9.9'
-        jdk 'jdk-21'
+        maven 'Maven 3.9.9' // Specify the Maven version
+        jdk 'jdk-21'        // Specify the JDK version
     }
 
+    // Define environment variables for the pipeline
     environment {
+        // Application versioning
         MAJOR_VERSION = "1"
         MINOR_VERSION = "0"
-        SETTINGS_PATH = "C:\\ProgramData\\Jenkins\\.m2\\settings.xml"
+        
+        // Maven settings path (adjust for Linux/Unix if needed)
+        SETTINGS_PATH = "C:\\ProgramData\\Jenkins\\.m2\\settings.xml" 
+        
+        // Branch name for conditional deployments
         BRANCH_NAME = "master"
     }
 
     stages {
-        stage('Checkout & Tag') {
+        // Stage 1: Checkout and prepare the workspace
+        stage('Checkout & Clean') {
             steps {
                 script {
-                    deleteDir()
-                    checkout scm
-                    echo "trigger configure"
-                    echo "${env.BRANCH_NAME}"
+                    echo "🧹 Cleaning workspace and checking out SCM..."
+                    deleteDir() // Clean the workspace to ensure a fresh build
+                    checkout scm // Checkout the source code from SCM
+                    echo "Current branch: ${env.BRANCH_NAME}"
                 }
             }
         }
-        stage('Build & Deploy') {
+
+        // Stage 2: Build and deploy the application artifact
+        stage('Build & Deploy Artifact') {
             steps {
-                bat "mvn clean deploy -DskipTests=true -s %SETTINGS_PATH%"
+                // Execute Maven clean and deploy, skipping tests for speed
+                // Using bat for Windows commands, replace with 'sh' for Linux
+                bat "mvn clean deploy -DskipTests=true -s \"${env.SETTINGS_PATH}\""
             }
             post {
                 success {
-                    echo "✅ Build completed"
-                    // buildAnsibleStage() // Uncomment if you want to call this function on success
+                    echo "✅ Build and artifact deployment completed successfully!"
+                    // Uncomment the following line to trigger Ansible deployment automatically on build success
+                    // buildAnsibleStage() 
+                }
+                failure {
+                    echo "❌ Build or artifact deployment failed. Check logs for details. 💥"
                 }
             }
         }
-        // Uncomment the following stage if you want to deploy the Jar in Server within the pipeline
         
-       
-            }
-        }
+        // --- Deployment Stages (Conditional on Branch) ---
 
-          stage('Deploy the Jar in DEV Server') {
-            when { expression {
-            "${env.BRANCH_NAME}" == "master"
-            } }
-            steps {
-                // Add your deployment steps here
-                echo "Deploying Jar to server..."
-                timeout(time: 72, unit: 'HOURS') {
-                    input(id: 'dev', message: 'Deploy to DEV?', ok: 'Deploy')
-                }
-                buildAnsibleStage()
+        // Stage 3: Deploy to DEV Server
+        stage('Deploy to DEV Server') {
+            when {
+                // Only deploy to DEV if on the master branch
+                expression { return env.BRANCH_NAME == "master" }
             }
-            
+            steps {
+                echo "🚀 Preparing to deploy Jar to DEV server..."
+                timeout(time: 72, unit: 'HOURS') { // Long timeout for manual approval
+                    input(id: 'devDeployConfirmation', message: 'Proceed with deployment to DEV?', ok: 'Deploy to DEV')
+                }
+                // Call the Ansible deployment function
+                buildAnsibleStage() 
+            }
             post {
                 success {
-                    echo "✅ Jar deployed successfully! 🚀"
+                    echo "✅ Jar successfully deployed to DEV! 🎉"
                 }
                 failure {
-                    echo "❌ Jar deployment failed! 💥"
+                    echo "❌ Jar deployment to DEV failed! 🚨"
                 }
                 aborted {
-                    echo "⚠️ Jar deployment aborted! ⛔"
+                    echo "⚠️ Jar deployment to DEV aborted! 🛑"
                 }
-            
-
             }
         }
 
-
-           stage('Deploy the Jar in QA Server') {
-            when { expression {
-            "${env.BRANCH_NAME}" == "master"
-            } }
+        // Stage 4: Deploy to QA Server
+        stage('Deploy to QA Server') {
+            when {
+                // Only deploy to QA if on the master branch
+                expression { return env.BRANCH_NAME == "master" }
+            }
             steps {
-                // Add your deployment steps here
-                echo "Deploying Jar to server..."
+                echo "🚀 Preparing to deploy Jar to QA server..."
                 timeout(time: 72, unit: 'HOURS') {
-                    input(id: 'qa', message: 'Deploy to QA?', ok: 'Deploy')
+                    input(id: 'qaDeployConfirmation', message: 'Proceed with deployment to QA?', ok: 'Deploy to QA')
                 }
+                // Call the Ansible deployment function
                 buildAnsibleStage()
             }
-            
             post {
                 success {
-                    echo "✅ Jar deployed successfully! 🚀"
+                    echo "✅ Jar successfully deployed to QA! 🎉"
                 }
                 failure {
-                    echo "❌ Jar deployment failed! 💥"
+                    echo "❌ Jar deployment to QA failed! 🚨"
                 }
                 aborted {
-                    echo "⚠️ Jar deployment aborted! ⛔"
+                    echo "⚠️ Jar deployment to QA aborted! 🛑"
                 }
-            
-
             }
         }
-           stage('Deploy the Jar in UAT Server') {
-            when { expression {
-            "${env.BRANCH_NAME}" == "master"
-            } }
+
+        // Stage 5: Deploy to UAT Server
+        stage('Deploy to UAT Server') {
+            when {
+                // Only deploy to UAT if on the master branch
+                expression { return env.BRANCH_NAME == "master" }
+            }
             steps {
-                // Add your deployment steps here
-                echo "Deploying Jar to server..."
+                echo "🚀 Preparing to deploy Jar to UAT server..."
                 timeout(time: 72, unit: 'HOURS') {
-                    input(id: 'uat', message: 'Deploy to UAT?', ok: 'Deploy')
+                    input(id: 'uatDeployConfirmation', message: 'Proceed with deployment to UAT?', ok: 'Deploy to UAT')
                 }
+                // Call the Ansible deployment function
                 buildAnsibleStage()
             }
-            
             post {
                 success {
-                    echo "✅ Jar deployed successfully! 🚀"
+                    echo "✅ Jar successfully deployed to UAT! 🎉"
                 }
                 failure {
-                    echo "❌ Jar deployment failed! 💥"
+                    echo "❌ Jar deployment to UAT failed! 🚨"
                 }
                 aborted {
-                    echo "⚠️ Jar deployment aborted! ⛔"
+                    echo "⚠️ Jar deployment to UAT aborted! 🛑"
                 }
-            
-
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
     }
 }
 
-// Define the buildAnsibleStage function outside the pipeline block
-// This function is currently not called in the pipeline above,
-// but can be uncommented in the 'Build & Deploy' stage's post section.
+// --- Helper Functions ---
+
+/**
+ * Function to trigger an Ansible AWX job template.
+ * This function uses a credential ID 'ansible_token' for authentication.
+ * Ensure this credential is configured in Jenkins.
+ */
 def buildAnsibleStage() {
+    // Ensure the AWX_TOKEN credential is available securely
     withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
         script {
-            def awxHost = "http://16.16.94.149"
-            def jobTemplateId = 10
+            def awxHost = "http://16.16.94.149" // Your AWX server URL
+            def jobTemplateId = 10             // The ID of your AWX job template
 
-            echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
+            echo "🎯 Triggering AWX Job Template #${jobTemplateId} on ${awxHost}..."
 
-            // Using powershell for curl on Windows agents for better compatibility
-            // For Linux/Unix agents, you'd typically use 'sh' instead of 'bat'
+            // Using 'bat' for Windows agents; use 'sh' for Linux/Unix
             bat """
             curl -X POST ^
               -H "Accept: application/json" ^
@@ -169,6 +162,7 @@ def buildAnsibleStage() {
               -H "Authorization: Bearer ${AWX_TOKEN}" ^
               "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
             """
+            echo "AWX job trigger command executed. Check AWX for status."
         }
     }
 }
