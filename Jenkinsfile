@@ -48,7 +48,7 @@ pipeline {
       }
       steps {
         echo "🚚 Ready to deploy to DEV..."
-        timeout(time: 2, unit: 'MINUTES' {
+        timeout(time: 2, unit: 'MINUTES') {
           input(id:'master', message:'Click for confirmation message', ok:'Deploy')
         }
                 echo "Message printed below"
