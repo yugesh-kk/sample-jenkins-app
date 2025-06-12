@@ -5,11 +5,6 @@ pipeline {
     pollSCM('H/45 * * * *') // Polls the git rep every 45 mins  
   }
 
-  tools {
-    maven 'Maven 3.9.9'
-    jdk 'jdk-21'
-  }
-
   environment{
     MAJOR_VERSION = "1"
     MINOR_VERSION = "0"
