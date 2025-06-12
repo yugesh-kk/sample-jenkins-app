@@ -24,7 +24,7 @@ pipeline {
           deleteDir()
           checkout scm
           def utils = load 'utils.groovy'
-          utils.branchName('${env.BRANCH_NAME}')
+          utils.branchName(env.BRANCH_NAME)
         }
       }
     }
