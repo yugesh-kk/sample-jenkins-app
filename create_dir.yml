@@ -2,10 +2,20 @@
 - hosts: all
   become: true
   tasks:
+    - name: Create a variable
+      set_fact:
+        file_name: "sample.txt"
+        file_path: /home/ubuntu/app
+
     - name: Create directory in server
       file: 
-        path: /home/ubuntu/app
+        path: {{ file_path }}
         state: directory
+
+    - name: Create a file
+      file:
+        path: {{ file_path }}/{{ file_name }}
+        state: touch
 
     - name: Create directory using Shell
       shell: mkdir shell_app
