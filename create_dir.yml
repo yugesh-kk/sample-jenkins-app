@@ -27,10 +27,10 @@
 
     - name: Copy the file from Source to Destination
       copy:
-        src: "{{ playbook_dir }}/hello.yml"
+        src: "{{ playbook_dir }}/ping.yml"
         dest: /home/ubuntu/shell_app
         mode: 0777
-        register: result
+      register: result
 
     - name: Show Result
       debug:
