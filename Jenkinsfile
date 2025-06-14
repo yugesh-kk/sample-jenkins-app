@@ -6,7 +6,7 @@ pipeline {
       steps {
         //script{
         echo 'Running Shell (sh) Command'
-        bat ansible_call()
+        ansible_call()
         //}
       }
     }
