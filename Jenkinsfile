@@ -5,7 +5,7 @@ pipeline {
     stage ('Create a Dir'){
       steps {
         script{
-          
+          ansible_call()
         }
       }
     }
@@ -15,7 +15,7 @@ pipeline {
   }
 }
 
-def ansible_call () {
+def ansible_call() {
    withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
      script {
         def awxHost = "http://16.16.94.149"
