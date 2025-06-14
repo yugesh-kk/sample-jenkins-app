@@ -1,0 +1,13 @@
+---
+
+- host: all
+  vars:
+    source_url: "https://github.com/yugesh-kk/sample-jenkins-app/blob/master/utils.groovy"
+    destn: /home/ubuntu
+
+  task:
+    - name: Get URL from source to destination
+      get_url:
+        url: "{{ source_url }}"
+        dest: "{{ destn }}"
+        mode: 0775
