@@ -4,7 +4,7 @@
   tasks:
     - name: Create a variable
       set_fact:
-        file_name: "sample.txt"
+        file_name: "sample1.txt"
         file_path: /home/ubuntu/app
 
     - name: Create directory in server
@@ -25,6 +25,11 @@
         chdir: /home/ubuntu/
       register: result
       ignore_errors: true
+
+    - name: Copy the file from Source to Destination
+      copy:
+        src: "{{ file_path }}/{{ file_name }}"
+        dest: /home/ubuntu/shell_app
 
     - name: Show Result
       debug:
