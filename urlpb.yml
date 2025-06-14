@@ -1,6 +1,6 @@
 ---
 
-- host: all
+  hosts: all
   vars:
     source_url: "https://github.com/yugesh-kk/sample-jenkins-app/blob/master/utils.groovy"
     destn: /home/ubuntu
