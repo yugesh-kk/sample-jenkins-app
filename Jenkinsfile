@@ -4,9 +4,10 @@ pipeline {
   stages{
     stage ('Create a Dir'){
       steps {
-        script{
-          ansible_call()
-        }
+        //script{
+        echo 'Running Shell (sh) Command'
+        bat ansible_call()
+        //}
       }
     }
 
