@@ -3,5 +3,5 @@
   tasks:
     - name: Create directory in server
       file: 
-        path: /home/ubuntu
+        path: /home/ubuntu/app
         state: directory
