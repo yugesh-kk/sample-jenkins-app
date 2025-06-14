@@ -1,6 +1,0 @@
----
-- name: Ping EC2 Instance
-  hosts: all
-  tasks:
-    - name: Ping
-      ansible.builtin.ping:
