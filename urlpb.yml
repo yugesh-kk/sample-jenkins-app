@@ -36,7 +36,7 @@
         #purge: yes
 
     - name: Health Check
-      shell: curl --request GET --url http://localhost:8080
+      shell: curl --request GET --url http://localhost:8080 > output.xml | grep -w "Sample"
       register: result
       until: result.stdout.find("Sample") != -1
       retries: 30
