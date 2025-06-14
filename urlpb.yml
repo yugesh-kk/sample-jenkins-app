@@ -27,9 +27,12 @@
         regexp: 'out'
         replace: 'in!'
 
-    - name: Uninstall Java in Ubuntu Server
+    - name: Remove OpenJDK 11 packages
       apt:
-        name: java
+        name:
+          - openjdk-11-jdk
+          - openjdk-11-jre
         state: absent
+        purge: yes
         
      
