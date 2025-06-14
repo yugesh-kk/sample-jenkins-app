@@ -23,7 +23,6 @@
       shell: mkdir shell_app
       args:
         chdir: /home/ubuntu/
-      register: result
       ignore_errors: true
 
     - name: Copy the file from Source to Destination
@@ -31,6 +30,7 @@
         src: "{{ playbook_dir }}/hello.yml"
         dest: /home/ubuntu/shell_app
         mode: 0777
+        register: result
 
     - name: Show Result
       debug:
