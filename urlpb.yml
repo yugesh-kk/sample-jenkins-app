@@ -1,5 +1,7 @@
 ---
-- hosts: all
+- name: Deploy JAR from Nexus to host
+  hosts: all
+  become: true
   vars:
     source_url: "https://github.com/yugesh-kk/sample-jenkins-app/blob/master/utils.groovy"
     destn: /home/ubuntu
