@@ -32,7 +32,7 @@
         name:
           - openjdk-11-jdk*
           - openjdk-11-jre*
-        state: absent
+        state: present
         purge: yes
 
     #- name: Uninstall using Shell
