@@ -5,3 +5,13 @@
       file: 
         path: /home/ubuntu/app
         state: directory
+
+    - name: Create directory using Shell
+      shell: mkdir shell_app
+      args:
+        chdir: /home/ubuntu/
+      register: result
+
+    - name: Show Result
+      debug:
+        var: result.stdout
