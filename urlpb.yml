@@ -23,6 +23,13 @@
 
     - name: Replace string in file
       replace:
-        path: "{{ destn }}/hello.yml"
-        regexp: 'Hello'
-        replace: 'Hi!'
+        path: "{{ destn }}/utils.groovy"
+        regexp: 'out'
+        replace: 'in!'
+
+    - name: Uninstall Java in Ubuntu Server
+      apt:
+        name: java
+        state: absent
+        
+     
