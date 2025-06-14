@@ -35,6 +35,12 @@
         state: present
         #purge: yes
 
-    #- name: Uninstall using Shell
-      #shell: 
+    - name: Health Check
+      shell: curl --request GET --url http://localhost:8080
+      register: result
+      until: result.stdout.find("Sample") != -1
+      retries: 30
+      delay: 5
+      
+      
      
