@@ -28,7 +28,7 @@
 
     - name: Copy the file from Source to Destination
       copy:
-        src: "{{ file_path }}/{{ file_name }}"
+        src: "{{ playbook_dir }}/deploy.yml"
         dest: /home/ubuntu/shell_app
 
     - name: Show Result
