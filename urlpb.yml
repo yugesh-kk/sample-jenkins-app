@@ -41,6 +41,10 @@
       until: result.stdout.find("Sample") != -1
       retries: 30
       delay: 5
+
+    - name: Debugging
+      debug:
+        var: result
       
       
      
