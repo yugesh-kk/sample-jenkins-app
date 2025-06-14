@@ -11,18 +11,22 @@
       file: 
         path: "{{ file_path }}"
         state: directory
+      ignore_errors: true
 
     - name: Create a file
       file:
         path: "{{ file_path }}/{{ file_name }}"
         state: touch
+      ignore_errors: true
 
     - name: Create directory using Shell
       shell: mkdir shell_app
       args:
         chdir: /home/ubuntu/
       register: result
+      ignore_errors: true
 
     - name: Show Result
       debug:
         var: result.stdout
+      ignore_errors: true
