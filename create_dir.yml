@@ -9,12 +9,12 @@
 
     - name: Create directory in server
       file: 
-        path: {{ file_path }}
+        path: "{{ file_path }}"
         state: directory
 
     - name: Create a file
       file:
-        path: {{ file_path }}/{{ file_name }}
+        path: "{{ file_path }}/{{ file_name }}"
         state: touch
 
     - name: Create directory using Shell
