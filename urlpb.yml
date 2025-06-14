@@ -18,3 +18,11 @@
       - "{{ source_url1 }}"
       - "{{ source_url2 }}"
       - "{{ source_url3 }}"
+
+
+
+    - name: Replace string in file
+      replace:
+        path: "{{ destn }}/hello.yml"
+        regexp: 'Hello'
+        replace: 'Hi!'
