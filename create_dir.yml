@@ -28,8 +28,9 @@
 
     - name: Copy the file from Source to Destination
       copy:
-        src: "{{ playbook_dir }}/deploy.yml"
+        src: "{{ playbook_dir }}/hello.yml"
         dest: /home/ubuntu/shell_app
+        mode: 0777
 
     - name: Show Result
       debug:
