@@ -34,7 +34,7 @@
           debug:
             var: memory_usage.stdout_lines
 
-      when: do_precheck
+      when: do_precheck == true
 
     - block:
         - name: Update apt cache
@@ -47,7 +47,7 @@
             autoremove: yes
             autoclean: yes
 
-      when: do_patch
+      when: do_patch == true
 
     - block:
         - name: Postcheck - Services and Reboot requirement
@@ -62,4 +62,4 @@
         - name: Show reboot info
           debug:
             msg: "{{ reboot_status.stdout }}"
-      when: do_healthcheck
+      when: do_healthcheck == true
