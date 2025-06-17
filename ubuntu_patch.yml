@@ -8,7 +8,9 @@
     do_healthcheck: false
 
   tasks:
-
+    - name: Show precheck variable
+      debug:
+        msg: "do_precheck is set to {{ do_precheck }}"
     - block:
         - name: Precheck - Uptime
           command: uptime
