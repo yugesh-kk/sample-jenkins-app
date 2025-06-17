@@ -1,0 +1,65 @@
+---
+- name: Ubuntu Full Patching Lifecycle
+  hosts: ubuntu_servers
+  become: true
+  vars:
+    do_precheck: false
+    do_patch: false
+    do_healthcheck: false
+
+  tasks:
+
+    - block:
+        - name: Precheck - Uptime
+          command: uptime
+          register: uptime_result
+
+        - name: Show uptime
+          debug:
+            msg: "{{ uptime_result.stdout }}"
+
+        - name: Disk usage
+          command: df -h
+          register: disk_usage
+
+        - name: Show disk usage
+          debug:
+            var: disk_usage.stdout_lines
+
+        - name: Memory usage
+          command: free -m
+          register: memory_usage
+
+        - name: Show memory
+          debug:
+            var: memory_usage.stdout_lines
+
+      when: do_precheck
+
+    - block:
+        - name: Update apt cache
+          apt:
+            update_cache: yes
+
+        - name: Upgrade all packages
+          apt:
+            upgrade: dist
+            autoremove: yes
+            autoclean: yes
+
+      when: do_patch
+
+    - block:
+        - name: Postcheck - Services and Reboot requirement
+          shell: |
+            if [ -f /var/run/reboot-required ]; then
+              echo "Reboot required"
+            else
+              echo "No reboot required"
+            fi
+          register: reboot_status
+
+        - name: Show reboot info
+          debug:
+            msg: "{{ reboot_status.stdout }}"
+      when: do_healthcheck
