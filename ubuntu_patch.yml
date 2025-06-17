@@ -1,6 +1,6 @@
 ---
 - name: Ubuntu Full Patching Lifecycle
-  hosts: ubuntu_servers
+  hosts: all
   become: true
   vars:
     do_precheck: false
