@@ -34,7 +34,7 @@
           debug:
             var: memory_usage.stdout_lines
 
-      when: do_precheck == true
+      when: do_precheck | bool
 
     - block:
         - name: Update apt cache
