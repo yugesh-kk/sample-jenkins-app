@@ -1,21 +1,16 @@
 pipeline {
   agent any
 
-  
+  environment {
+    AWX_URL = "http://16.16.94.149"
+    TEMPLATE_ID = "12"
+  }
 
   stages {
-
     stage('Precheck') {
       steps {
         script {
-          buildAnsibleStage("do_precheck")
-          /*def response = sh(script: """
-            curl -s -X POST ${AWX_URL}/api/v2/job_templates/${TEMPLATE_ID}/launch/ \\
-              -H "Authorization: Bearer ${AWX_TOKEN}" \\
-              -H "Content-Type: application/json" \\
-              -d '{ "extra_vars": { "do_precheck": true } }'
-          """, returnStdout: true).trim()*/
-
+          def response = buildAnsibleStage("do_precheck")
           echo "Precheck Job Response: ${response}"
         }
       }
@@ -24,14 +19,7 @@ pipeline {
     stage('Patching') {
       steps {
         script {
-          buildAnsibleStage("do_patch")
-          /*def response = sh(script: """
-            curl -s -X POST ${AWX_URL}/api/v2/job_templates/${TEMPLATE_ID}/launch/ \\
-              -H "Authorization: Bearer ${AWX_TOKEN}" \\
-              -H "Content-Type: application/json" \\
-              -d '{ "extra_vars": { "do_patch": true } }'
-          """, returnStdout: true).trim()*/
-
+          def response = buildAnsibleStage("do_patch")
           echo "Patching Job Response: ${response}"
         }
       }
@@ -40,14 +28,7 @@ pipeline {
     stage('Healthcheck') {
       steps {
         script {
-          buildAnsibleStage("do_healthcheck")
-          /*def response = sh(script: """
-            curl -s -X POST ${AWX_URL}/api/v2/job_templates/${TEMPLATE_ID}/launch/ \\
-              -H "Authorization: Bearer ${AWX_TOKEN}" \\
-              -H "Content-Type: application/json" \\
-              -d '{ "extra_vars": { "do_healthcheck": true } }'
-          """, returnStdout: true).trim()*/
-
+          def response = buildAnsibleStage("do_healthcheck")
           echo "Healthcheck Job Response: ${response}"
         }
       }
@@ -56,23 +37,24 @@ pipeline {
 }
 
 def buildAnsibleStage(String action) {
-    withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
-        script {
-            def awxHost = "http://16.16.94.149"
-            def jobTemplateId = 12
+  withCredentials([string(credentialsId: 'ansible_token', variable: 'AWX_TOKEN')]) {
+    script {
+      def awxHost = "http://16.16.94.149"
+      def jobTemplateId = 12
 
-            echo "🎯 Triggering AWX Job Template #${jobTemplateId} for action: ${action}"
+      echo "🎯 Triggering AWX Job Template #${jobTemplateId} for action: ${action}"
 
-            def curlCommand = """
-                curl -X POST ^
-                -H "Accept: application/json" ^
-                -H "Content-Type: application/json" ^
-                -H "Authorization: Bearer ${AWX_TOKEN}" ^
-                -d "{\\"extra_vars\\": {\\"${action}\\": true}}" ^
-                "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
-            """
+      def curlCommand = """
+        curl -X POST ^
+        -H "Accept: application/json" ^
+        -H "Content-Type: application/json" ^
+        -H "Authorization: Bearer ${AWX_TOKEN}" ^
+        -d "{\\"extra_vars\\": {\\"${action}\\": true}}" ^
+        "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
+      """
 
-            bat returnStdout: true, script: curlCommand
-        }
+      // Capture and return response
+      return bat(script: curlCommand, returnStdout: true).trim()
     }
+  }
 }
