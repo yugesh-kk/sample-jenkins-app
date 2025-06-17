@@ -61,17 +61,18 @@ def buildAnsibleStage(String action) {
             def awxHost = "http://16.16.94.149"
             def jobTemplateId = 12
 
-            echo "🎯 Triggering AWX Job Template #${jobTemplateId}"
+            echo "🎯 Triggering AWX Job Template #${jobTemplateId} for action: ${action}"
 
-            bat """
+            def curlCommand = """
                 curl -X POST ^
-                  -H "Accept: application/json" ^
-                  -H "Content-Type: application/json" ^
-                  -H "Authorization: Bearer ${AWX_TOKEN}" ^
-                  "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/" ^
-                  "-d '{ "extra_vars": { ${action}: true } }" ^
-                  ", returnStdout: true).trim()"
+                -H "Accept: application/json" ^
+                -H "Content-Type: application/json" ^
+                -H "Authorization: Bearer ${AWX_TOKEN}" ^
+                -d "{\\"extra_vars\\": {\\"${action}\\": true}}" ^
+                "${awxHost}/api/v2/job_templates/${jobTemplateId}/launch/"
             """
+
+            bat returnStdout: true, script: curlCommand
         }
     }
 }
