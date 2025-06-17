@@ -2,36 +2,40 @@ pipeline {
   agent any
 
   environment {
-    EC2_USER = 'ubuntu'
-    EC2_HOST = '13.49.230.232'
-    SSH_KEY = credentials('ec2-ssh-key')  // Upload PEM as Jenkins credential
-    REPO_URL = 'https://github.com/your-username/my-python-app.git'
+    AWX_HOST = "http://16.16.94.149"               // Ansible Tower URL
+    AWX_TOKEN = credentials('ansible_token')   // Jenkins secret text credential
+    JOB_TEMPLATE_ID = "12"                     // AWX Job Template ID
   }
 
   stages {
-    stage('Clone Repository') {
+    stage('Checkout Code') {
       steps {
-        git url: "${REPO_URL}"
+        deleteDir()
+        checkout scm
       }
     }
 
     stage('Build Docker Image') {
       steps {
         script {
-          docker.build('my-python-app')
+          docker.build("my-python-app:${BUILD_NUMBER}")
         }
       }
     }
 
-    stage('Install Python File on EC2') {
+    /*stage('Trigger Ansible Tower') {
       steps {
-        echo "⚙️ Copying app.py to EC2 instance..."
-        sh """
-          chmod 400 ${SSH_KEY}
-          scp -o StrictHostKeyChecking=no -i ${SSH_KEY} app.py ${EC2_USER}@${EC2_HOST}:/home/ubuntu/
-          ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${EC2_USER}@${EC2_HOST} 'python3 /home/ubuntu/app.py'
-        """
+        script {
+          echo "Triggering Ansible Job on AWX..."
+          sh """
+            curl -X POST $AWX_HOST/api/v2/job_templates/$JOB_TEMPLATE_ID/launch \\
+              -H "Authorization: Bearer $AWX_TOKEN" \\
+              -H "Content-Type: application/json"
+          """
+        }
       }
-    }
+    }*/
+
+    
   }
 }
