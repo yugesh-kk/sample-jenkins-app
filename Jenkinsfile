@@ -1,60 +1,37 @@
 pipeline {
   agent any
 
-  triggers {
-    pollSCM('H/45 * * * *')
-  }
-
   environment {
-    IMAGE_NAME = "python-app"
-    EC2_HOST = "ubuntu@<EC2-IP>"
-    PEM_KEY = "/path/to/your-key.pem"  // Jenkins should have access to this key
-    PYTHON_FILE = "app.py"
-    DOCKERFILE_PATH = "Dockerfile"
-    GITHUB_REPO = "https://github.com/<your-org>/<repo-name>.git"
+    EC2_USER = 'ubuntu'
+    EC2_HOST = '13.49.230.232'
+    SSH_KEY = credentials('ec2-ssh-key')  // Upload PEM as Jenkins credential
+    REPO_URL = 'https://github.com/your-username/my-python-app.git'
   }
 
   stages {
-    stage('Checkout') {
+    stage('Clone Repository') {
       steps {
-        deleteDir()
-        git "${GITHUB_REPO}"
+        git url: "${REPO_URL}"
       }
     }
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH} ."
+        script {
+          docker.build('my-python-app')
+        }
       }
     }
 
-    stage('Save & Copy Image to EC2') {
+    stage('Install Python File on EC2') {
       steps {
+        echo "⚙️ Copying app.py to EC2 instance..."
         sh """
-        docker save -o ${IMAGE_NAME}.tar ${IMAGE_NAME}
-        scp -i ${PEM_KEY} ${IMAGE_NAME}.tar ${EC2_HOST}:/home/ubuntu/
+          chmod 400 ${SSH_KEY}
+          scp -o StrictHostKeyChecking=no -i ${SSH_KEY} app.py ${EC2_USER}@${EC2_HOST}:/home/ubuntu/
+          ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${EC2_USER}@${EC2_HOST} 'python3 /home/ubuntu/app.py'
         """
       }
-    }
-
-    stage('Run on EC2') {
-      steps {
-        sh """
-        ssh -i ${PEM_KEY} ${EC2_HOST} << 'EOF'
-          docker load -i /home/ubuntu/${IMAGE_NAME}.tar
-          docker run --rm ${IMAGE_NAME}
-        EOF
-        """
-      }
-    }
-  }
-
-  post {
-    success {
-      echo "✅ Python app deployed and executed on EC2!"
-    }
-    failure {
-      echo "❌ Deployment failed!"
     }
   }
 }
